@@ -1,11 +1,11 @@
 
-// Prevent the import from the renamed file
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import Container from "@/components/ui/Container";
 import ProductCard from "@/components/ui/ProductCard";
 import { useQuery } from "@tanstack/react-query";
-import { products } from "@/lib/data";
+import { products, Product } from "@/lib/data";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const FeaturedProducts = () => {
   const navigate = useNavigate();
@@ -15,9 +15,9 @@ const FeaturedProducts = () => {
     queryKey: ['featuredProducts'],
     queryFn: () => {
       // Simulating API call with local data
-      return new Promise((resolve) => {
+      return new Promise<Product[]>((resolve) => {
         setTimeout(() => {
-          resolve(products.filter(product => product.featured));
+          resolve(products.filter(product => product.isFeatured));
         }, 500);
       });
     },
@@ -36,14 +36,25 @@ const FeaturedProducts = () => {
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[...Array(4)].map((_, index) => (
-              <div key={index} className="rounded-lg bg-gray-100 h-64 animate-pulse"></div>
+              <div key={index} className="rounded-lg bg-gray-100 h-64 animate-pulse">
+                <Skeleton className="h-full w-full" />
+              </div>
             ))}
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredProducts?.slice(0, 4).map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                  key={product.id} 
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  image={product.image}
+                  category={product.category}
+                  isNew={product.isNew}
+                  isFeatured={product.isFeatured}
+                />
               ))}
             </div>
             

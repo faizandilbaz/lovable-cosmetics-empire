@@ -1,208 +1,307 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Search, Filter, X } from "lucide-react";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
-import { Search, Calendar, User, Clock } from "lucide-react";
-
-// Mock blog data
-const blogPosts = [
-  {
-    id: 1,
-    title: "The Ultimate Guide to Skincare Layering",
-    excerpt: "Learn the correct order to apply your skincare products for maximum effectiveness.",
-    image: "https://placehold.co/800x500/f8f9fa/495057?text=Skincare+Layering",
-    date: "2023-06-15",
-    author: "Sarah Johnson",
-    category: "Skincare",
-    readTime: "8 min read",
-    tags: ["skincare", "beauty tips", "routine"],
-  },
-  {
-    id: 2,
-    title: "Summer Makeup Trends You Need to Try",
-    excerpt: "Discover the hottest makeup looks for the summer season and how to achieve them.",
-    image: "https://placehold.co/800x500/f8f9fa/495057?text=Summer+Makeup",
-    date: "2023-06-10",
-    author: "Emily Williams",
-    category: "Makeup",
-    readTime: "6 min read",
-    tags: ["makeup", "trends", "summer"],
-  },
-  {
-    id: 3,
-    title: "How to Choose the Right Foundation for Your Skin Type",
-    excerpt: "Find your perfect foundation match with our comprehensive guide.",
-    image: "https://placehold.co/800x500/f8f9fa/495057?text=Foundation+Guide",
-    date: "2023-06-05",
-    author: "Alex Lee",
-    category: "Makeup",
-    readTime: "10 min read",
-    tags: ["foundation", "makeup", "skin type"],
-  },
-  {
-    id: 4,
-    title: "Natural Ingredients That Work Wonders for Acne-Prone Skin",
-    excerpt: "Discover natural remedies to combat acne and achieve clear skin.",
-    image: "https://placehold.co/800x500/f8f9fa/495057?text=Natural+Ingredients",
-    date: "2023-05-28",
-    author: "Jessica Brown",
-    category: "Skincare",
-    readTime: "7 min read",
-    tags: ["acne", "natural", "skincare"],
-  },
-  {
-    id: 5,
-    title: "The Art of Fragrance Layering",
-    excerpt: "Create your signature scent by mastering the technique of fragrance layering.",
-    image: "https://placehold.co/800x500/f8f9fa/495057?text=Fragrance+Layering",
-    date: "2023-05-20",
-    author: "Michael Stevens",
-    category: "Fragrance",
-    readTime: "5 min read",
-    tags: ["fragrance", "perfume", "scent"],
-  },
-  {
-    id: 6,
-    title: "Haircare Mistakes You Might Be Making",
-    excerpt: "Avoid these common haircare mistakes for healthier, more beautiful hair.",
-    image: "https://placehold.co/800x500/f8f9fa/495057?text=Haircare+Mistakes",
-    date: "2023-05-15",
-    author: "Olivia Davis",
-    category: "Haircare",
-    readTime: "9 min read",
-    tags: ["haircare", "hair health", "tips"],
-  },
-];
-
-const categories = ["All", "Skincare", "Makeup", "Haircare", "Fragrance"];
+import { Button } from "@/components/ui/button";
+import BlogPost from "@/components/blog/BlogPost";
+import { blogPosts } from "@/lib/blog-data";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Blog = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
+  const location = useLocation();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentCategory, setCurrentCategory] = useState<string | null>(null);
+  const [posts, setPosts] = useState(blogPosts);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const filteredPosts = blogPosts.filter((post) => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        post.author.toLowerCase().includes(searchTerm.toLowerCase());
+  // Get unique categories
+  const categories = Array.from(new Set(blogPosts.map((post) => post.category)));
+
+  // Extract category from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const category = params.get("category");
     
-    const matchesCategory = activeCategory === "All" || post.category === activeCategory;
+    if (category) {
+      setCurrentCategory(category);
+    } else {
+      setCurrentCategory(null);
+    }
     
-    return matchesSearch && matchesCategory;
-  });
+    // Simulate data loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, [location.search]);
+
+  // Filter posts based on search term and category
+  useEffect(() => {
+    let filtered = [...blogPosts];
+    
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (post) =>
+          post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          post.content.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (currentCategory) {
+      filtered = filtered.filter(
+        (post) => post.category.toLowerCase() === currentCategory.toLowerCase()
+      );
+    }
+    
+    setPosts(filtered);
+  }, [searchTerm, currentCategory]);
+
+  // Find featured post
+  const featuredPost = blogPosts.find((post) => post.featured);
+
+  // Handle search submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Update URL with search query if needed
+    // Here we're just filtering in state
+  };
+
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
-    <Container>
-      <div className="py-10 space-y-8">
-        <div className="text-center max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">Beauty Tips & Trends</h1>
-          <p className="text-gray-600">
-            Read expert skincare guides, cosmetic how-tos, and more from our beauty experts.
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search blog..."
-              className="pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow pt-24">
+        <Container>
+          {/* Hero Section */}
+          <div className="mb-12">
+            <h1 className="text-3xl md:text-4xl font-medium mb-4">Beauty Tips & Trends</h1>
+            <p className="text-muted-foreground max-w-2xl">
+              Explore expert skincare guides, makeup tutorials, and the latest beauty trends to
+              enhance your routine and discover new products.
+            </p>
           </div>
           
-          <Tabs 
-            value={activeCategory} 
-            onValueChange={setActiveCategory}
-            className="w-full sm:w-auto"
-          >
-            <TabsList className="w-full grid grid-cols-3 sm:grid-cols-5">
-              {categories.map((category) => (
-                <TabsTrigger key={category} value={category}>
-                  {category}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {filteredPosts.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-lg text-muted-foreground mb-4">No posts found</p>
-            <Button onClick={() => {
-              setSearchTerm("");
-              setActiveCategory("All");
-            }}>
-              Clear Filters
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post) => (
-              <div 
-                key={post.id} 
-                className="group border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-                onClick={() => navigate(`/blog/${post.id}`)}
-              >
-                <div className="relative h-48 overflow-hidden">
-                  <img 
-                    src={post.image} 
-                    alt={post.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          {/* Search and Filters */}
+          <div className="mb-10">
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <form onSubmit={handleSearch} className="flex-grow">
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Search articles..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10"
                   />
-                  <Badge className="absolute top-3 right-3">
-                    {post.category}
-                  </Badge>
+                  <Search
+                    size={18}
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                  />
                 </div>
-                <div className="p-5 space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      <span>{new Date(post.date).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      <span>{post.author}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      <span>{post.readTime}</span>
-                    </div>
-                  </div>
-                  <h2 className="text-xl font-semibold transition-colors group-hover:text-primary">
-                    {post.title}
-                  </h2>
-                  <p className="text-muted-foreground line-clamp-2">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex gap-2 flex-wrap">
-                    {post.tags.map((tag) => (
-                      <span 
-                        key={tag} 
-                        className="text-xs px-2 py-1 bg-secondary/20 rounded-full"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    className="px-0 text-primary hover:text-primary/70 hover:bg-transparent"
+              </form>
+              
+              <Button
+                variant="outline"
+                className="md:hidden"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+              >
+                <Filter size={18} className="mr-2" />
+                Filter by Category
+              </Button>
+            </div>
+            
+            {/* Categories - Mobile */}
+            {isFilterOpen && (
+              <div className="md:hidden mb-6 p-4 border rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-medium">Categories</h3>
+                  <button
+                    onClick={() => setIsFilterOpen(false)}
+                    className="text-muted-foreground"
                   >
-                    Read More →
-                  </Button>
+                    <X size={18} />
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  <button
+                    className={`w-full text-left py-2 px-3 rounded-md transition-colors ${
+                      currentCategory === null
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-secondary"
+                    }`}
+                    onClick={() => {
+                      setCurrentCategory(null);
+                      navigate("/blog");
+                      setIsFilterOpen(false);
+                    }}
+                  >
+                    All Categories
+                  </button>
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      className={`w-full text-left py-2 px-3 rounded-md transition-colors ${
+                        currentCategory === category.toLowerCase()
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-secondary"
+                      }`}
+                      onClick={() => {
+                        setCurrentCategory(category.toLowerCase());
+                        navigate(`/blog?category=${category.toLowerCase()}`);
+                        setIsFilterOpen(false);
+                      }}
+                    >
+                      {category}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ))}
+            )}
+            
+            {/* Categories - Desktop */}
+            <div className="hidden md:flex flex-wrap gap-2">
+              <Button
+                variant={currentCategory === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setCurrentCategory(null);
+                  navigate("/blog");
+                }}
+              >
+                All
+              </Button>
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={
+                    currentCategory === category.toLowerCase() ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => {
+                    setCurrentCategory(category.toLowerCase());
+                    navigate(`/blog?category=${category.toLowerCase()}`);
+                  }}
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
-    </Container>
+          
+          {isLoading ? (
+            <div className="grid gap-10">
+              {/* Featured Post Skeleton */}
+              <div className="mb-10">
+                <Skeleton className="w-full aspect-[21/9] rounded-lg mb-4" />
+                <Skeleton className="h-8 w-3/4 mb-3" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+              
+              {/* Regular Posts Skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, index) => (
+                  <div key={index}>
+                    <Skeleton className="w-full aspect-[16/9] rounded-lg mb-4" />
+                    <Skeleton className="h-6 w-3/4 mb-3" />
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-10">
+              {/* Featured Post */}
+              {featuredPost && !currentCategory && !searchTerm && (
+                <div className="mb-10">
+                  <article className="grid md:grid-cols-2 gap-6 items-center">
+                    <div className="relative aspect-[4/3] md:aspect-square overflow-hidden rounded-lg">
+                      <img
+                        src={featuredPost.image}
+                        alt={featuredPost.title}
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      />
+                      <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-md">
+                        Featured
+                      </span>
+                    </div>
+                    <div>
+                      <div className="flex gap-3 text-xs text-muted-foreground mb-3">
+                        <span>{featuredPost.date}</span>
+                        <span>•</span>
+                        <span>{featuredPost.author}</span>
+                        <span>•</span>
+                        <span>{featuredPost.readTime}</span>
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-medium mb-3">
+                        <a href={`/blog/${featuredPost.slug}`} className="hover:text-primary transition-colors">
+                          {featuredPost.title}
+                        </a>
+                      </h2>
+                      <p className="text-muted-foreground mb-4">{featuredPost.excerpt}</p>
+                      <Button variant="outline" asChild>
+                        <a href={`/blog/${featuredPost.slug}`}>Read Article</a>
+                      </Button>
+                    </div>
+                  </article>
+                </div>
+              )}
+              
+              {/* Blog Posts Grid */}
+              {posts.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {posts.map((post) => (
+                    <BlogPost
+                      key={post.id}
+                      id={post.id}
+                      title={post.title}
+                      slug={post.slug}
+                      excerpt={post.excerpt}
+                      image={post.image}
+                      date={post.date}
+                      author={post.author}
+                      readTime={post.readTime}
+                      category={post.category}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 border border-dashed rounded-lg">
+                  <h3 className="text-xl font-medium mb-2">No articles found</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Try adjusting your search or filter to find what you're looking for.
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setCurrentCategory(null);
+                      navigate("/blog");
+                    }}
+                  >
+                    View All Articles
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </Container>
+      </main>
+      <Footer />
+    </div>
   );
 };
 
