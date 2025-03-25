@@ -1,82 +1,64 @@
 
-import { useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import ProductCard from "../ui/ProductCard";
-import Button from "../ui/Button";
-import Container from "../ui/Container";
+// Prevent the import from the renamed file
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import Container from "@/components/ui/Container";
+import ProductCard from "@/components/ui/ProductCard";
+import { useQuery } from "@tanstack/react-query";
 import { products } from "@/lib/data";
 
 const FeaturedProducts = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   
-  const scrollLeft = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollBy({ left: -320, behavior: "smooth" });
-    }
-  };
-  
-  const scrollRight = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollBy({ left: 320, behavior: "smooth" });
-    }
-  };
-
-  // Filter featured products
-  const featuredProducts = products.filter(product => product.isFeatured);
+  // Use React Query to fetch featured products
+  const { data: featuredProducts, isLoading } = useQuery({
+    queryKey: ['featuredProducts'],
+    queryFn: () => {
+      // Simulating API call with local data
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(products.filter(product => product.featured));
+        }, 500);
+      });
+    },
+  });
 
   return (
-    <section className="py-20">
+    <section className="py-16 bg-white">
       <Container>
-        <div className="flex justify-between items-end mb-10">
-          <div>
-            <h2 className="text-3xl font-medium mb-3">Featured Products</h2>
-            <p className="text-muted-foreground max-w-md">
-              Discover our handpicked selection of premium products designed to elevate your beauty routine.
-            </p>
-          </div>
-          <div className="flex space-x-2">
-            <button 
-              onClick={scrollLeft}
-              className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-secondary transition-colors"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button 
-              onClick={scrollRight}
-              className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-secondary transition-colors"
-              aria-label="Scroll right"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-3">Featured Products</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Discover our handpicked selection of premium cosmetics designed to enhance your natural beauty.
+          </p>
         </div>
         
-        <div 
-          ref={containerRef}
-          className="flex overflow-x-scroll space-x-6 pb-8 scroll-smooth hide-scrollbar"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {featuredProducts.map((product) => (
-            <div key={product.id} className="min-w-[280px]">
-              <ProductCard
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                image={product.image}
-                category={product.category}
-                isNew={product.isNew}
-                isFeatured={product.isFeatured}
-              />
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="rounded-lg bg-gray-100 h-64 animate-pulse"></div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts?.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
-          ))}
-        </div>
-        
-        <div className="flex justify-center mt-10">
-          <Button to="/shop" variant="outline">
-            View All Products
-          </Button>
-        </div>
+            
+            <div className="mt-12 text-center">
+              <Button 
+                onClick={() => navigate('/shop')} 
+                variant="outline" 
+                size="lg"
+                className="font-medium"
+              >
+                View All Products
+              </Button>
+            </div>
+          </>
+        )}
       </Container>
     </section>
   );
