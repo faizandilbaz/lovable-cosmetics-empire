@@ -5,7 +5,7 @@ import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
-import Button from "@/components/ui/Button";
+import ButtonCustom from "@/components/ui/button-custom";
 import { products } from "@/lib/data";
 
 interface CartItem {
@@ -250,13 +250,13 @@ const Cart = () => {
                     </p>
                   </div>
                   
-                  <Button 
+                  <ButtonCustom 
                     to="/checkout"
                     className="w-full"
                     icon={<ArrowRight size={16} />}
                   >
                     Proceed to Checkout
-                  </Button>
+                  </ButtonCustom>
                 </div>
               </div>
             </div>
@@ -270,7 +270,7 @@ const Cart = () => {
                 Looks like you haven't added any products to your cart yet.
                 Browse our products and find something you'll love.
               </p>
-              <Button to="/shop">Start Shopping</Button>
+              <ButtonCustom to="/shop">Start Shopping</ButtonCustom>
             </div>
           )}
         </Container>

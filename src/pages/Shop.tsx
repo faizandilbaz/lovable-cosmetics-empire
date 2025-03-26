@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
 import ProductCard from "@/components/ui/ProductCard";
 import { Button } from "@/components/ui/button";
+import ButtonCustom from "@/components/ui/button-custom";
 import { products } from "@/lib/data";
 
 const Shop = () => {
@@ -93,14 +94,14 @@ const Shop = () => {
         <Container className="py-10">
           {/* Mobile Filter Toggle */}
           <div className="md:hidden mb-6">
-            <Button 
+            <ButtonCustom 
               variant="outline" 
               className="w-full"
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               icon={<Filter size={18} />}
             >
               Filter Products
-            </Button>
+            </ButtonCustom>
           </div>
           
           <div className="flex flex-col md:flex-row gap-8">
@@ -172,12 +173,12 @@ const Shop = () => {
               {/* Apply Filters Button - Mobile Only */}
               {isFilterOpen && (
                 <div className="mt-8 md:hidden">
-                  <Button 
+                  <ButtonCustom 
                     className="w-full"
                     onClick={() => setIsFilterOpen(false)}
                   >
                     Apply Filters
-                  </Button>
+                  </ButtonCustom>
                 </div>
               )}
             </div>

@@ -15,7 +15,7 @@ import {
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
-import Button from "@/components/ui/Button";
+import ButtonCustom from "@/components/ui/button-custom";
 import ProductCard from "@/components/ui/ProductCard";
 import { products, Product } from "@/lib/data";
 
@@ -268,27 +268,27 @@ const ProductDetail = () => {
               
               {/* Add to Cart */}
               <div className="flex flex-wrap gap-4 mb-8">
-                <Button
+                <ButtonCustom
                   className="flex-1"
                   icon={<ShoppingBag size={18} />}
                   onClick={handleAddToCart}
                 >
                   Add to Cart
-                </Button>
-                <Button
+                </ButtonCustom>
+                <ButtonCustom
                   variant="outline"
                   className="w-12 h-12 p-0"
                   aria-label="Add to wishlist"
                 >
                   <Heart size={18} />
-                </Button>
-                <Button
+                </ButtonCustom>
+                <ButtonCustom
                   variant="outline"
                   className="w-12 h-12 p-0"
                   aria-label="Share"
                 >
                   <Share2 size={18} />
-                </Button>
+                </ButtonCustom>
               </div>
               
               {/* Added to Cart Message */}

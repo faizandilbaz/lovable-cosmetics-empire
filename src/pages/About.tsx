@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
-import Button from "@/components/ui/Button";
+import ButtonCustom from "@/components/ui/button-custom";
 import Newsletter from "@/components/home/Newsletter";
 
 const About = () => {
@@ -99,7 +99,7 @@ const About = () => {
                     <span className="text-muted-foreground">Creating products that work for everyone</span>
                   </li>
                 </ul>
-                <Button to="/shop">Explore Our Products</Button>
+                <ButtonCustom to="/shop">Explore Our Products</ButtonCustom>
               </div>
             </div>
           </Container>

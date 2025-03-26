@@ -5,7 +5,7 @@ import { ArrowLeft, CreditCard, Check } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
-import Button from "@/components/ui/Button";
+import ButtonCustom from "@/components/ui/button-custom";
 
 const Checkout = () => {
   const [step, setStep] = useState(1);
@@ -209,7 +209,7 @@ const Checkout = () => {
                           <ArrowLeft size={16} className="mr-2" />
                           Return to Cart
                         </Link>
-                        <Button onClick={nextStep}>Continue to Shipping</Button>
+                        <ButtonCustom onClick={nextStep}>Continue to Shipping</ButtonCustom>
                       </div>
                     </div>
                   )}
@@ -352,7 +352,7 @@ const Checkout = () => {
                           <ArrowLeft size={16} className="mr-2" />
                           Back to Information
                         </button>
-                        <Button onClick={nextStep}>Continue to Payment</Button>
+                        <ButtonCustom onClick={nextStep}>Continue to Payment</ButtonCustom>
                       </div>
                     </div>
                   )}
@@ -449,9 +449,9 @@ const Checkout = () => {
                           <ArrowLeft size={16} className="mr-2" />
                           Back to Shipping
                         </button>
-                        <Button onClick={placeOrder} icon={<Check size={16} />}>
+                        <ButtonCustom onClick={placeOrder} icon={<Check size={16} />}>
                           Place Order
-                        </Button>
+                        </ButtonCustom>
                       </div>
                     </div>
                   )}
@@ -520,10 +520,10 @@ const Checkout = () => {
                 We've sent a confirmation email to <span className="font-medium text-foreground">{contactInfo.email}</span>
               </p>
               <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <Button to="/shop">Continue Shopping</Button>
-                <Button to="/" variant="outline">
+                <ButtonCustom to="/shop">Continue Shopping</ButtonCustom>
+                <ButtonCustom to="/" variant="outline">
                   Return to Home
-                </Button>
+                </ButtonCustom>
               </div>
             </div>
           )}
