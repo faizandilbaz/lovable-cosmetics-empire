@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -33,7 +35,7 @@ const AdminLogin = () => {
       } else {
         toast({
           title: "Login failed",
-          description: "Incorrect email or password. Try admin@example.com / password",
+          description: "Incorrect email or password.",
           variant: "destructive",
         });
       }
@@ -59,6 +61,15 @@ const AdminLogin = () => {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            <Alert variant="outline" className="bg-muted/50 border-muted">
+              <Info className="h-4 w-4" />
+              <AlertDescription className="text-sm">
+                <strong>Demo credentials:</strong><br />
+                Email: admin@example.com<br />
+                Password: password
+              </AlertDescription>
+            </Alert>
+            
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
