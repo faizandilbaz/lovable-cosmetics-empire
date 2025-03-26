@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -13,15 +14,16 @@ const AdminLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAdminAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // In a real app, this would be an API call to authenticate
-    setTimeout(() => {
-      // Mock login - for demo purposes only
-      if (email === "admin@example.com" && password === "password") {
+    try {
+      const success = await login(email, password);
+      
+      if (success) {
         toast({
           title: "Login successful",
           description: "You have been logged in to the admin panel.",
@@ -35,8 +37,15 @@ const AdminLogin = () => {
           variant: "destructive",
         });
       }
+    } catch (error) {
+      toast({
+        title: "Login error",
+        description: "An error occurred during login.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (

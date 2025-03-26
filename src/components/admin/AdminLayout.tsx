@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Package, 
@@ -14,7 +14,6 @@ import {
   UserCog,
   Menu,
   LogOut,
-  ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { Outlet } from "react-router-dom";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
@@ -41,15 +42,10 @@ const sidebarItems = [
   { icon: Settings, label: "Settings", path: "/admin/settings" },
 ];
 
-const AdminLayout = () => {
+const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
-
-  const handleLogout = () => {
-    // In a real app, handle logout logic here
-    navigate("/admin/login");
-  };
+  const { logout, currentAdmin } = useAdminAuth();
 
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -115,17 +111,17 @@ const AdminLayout = () => {
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/avatar.png" alt="Admin" />
-                    <AvatarFallback>AD</AvatarFallback>
+                    <AvatarFallback>{currentAdmin?.name.split(' ').map(n => n[0]).join('') || 'AD'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Admin User</DropdownMenuLabel>
+                <DropdownMenuLabel>{currentAdmin?.name || 'Admin User'}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link to="/admin/settings" className="flex w-full">Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem onClick={logout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
@@ -136,7 +132,7 @@ const AdminLayout = () => {
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto p-4">
-          <Outlet />
+          {children || <Outlet />}
         </main>
       </div>
     </div>
