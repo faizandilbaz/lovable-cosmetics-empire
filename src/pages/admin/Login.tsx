@@ -61,7 +61,7 @@ const AdminLogin = () => {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            <Alert variant="outline" className="bg-muted/50 border-muted">
+            <Alert className="bg-muted/50 border-muted">
               <Info className="h-4 w-4" />
               <AlertDescription className="text-sm">
                 <strong>Demo credentials:</strong><br />
