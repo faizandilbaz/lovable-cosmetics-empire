@@ -24,3 +24,15 @@ export interface ProductFormData {
 }
 
 export type ProductStatus = "In Stock" | "Out of Stock" | "Low Stock";
+
+export type SortOrder = "asc" | "desc";
+export type SortField = "name" | "price" | "stock" | "category" | "createdAt";
+
+export interface ProductFilters {
+  search?: string;
+  category?: string;
+  status?: ProductStatus | "all";
+  featured?: boolean | "all";
+  sortField?: SortField;
+  sortOrder?: SortOrder;
+}

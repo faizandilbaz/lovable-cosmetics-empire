@@ -1,5 +1,5 @@
 
-import { Product, ProductFormData } from "@/types/product";
+import { Product, ProductFormData, ProductFilters, SortField, SortOrder } from "@/types/product";
 
 // Mock database for now, would replace with real database in production
 const STORAGE_KEY = "luxe_products";
@@ -25,6 +25,13 @@ const getStoredProducts = (): Product[] => {
 // Helper to save products to local storage
 const saveProductsToStorage = (products: Product[]): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+};
+
+// Determine product status based on stock
+const determineProductStatus = (stock: number): "In Stock" | "Out of Stock" | "Low Stock" => {
+  if (stock <= 0) return "Out of Stock";
+  if (stock < 10) return "Low Stock";
+  return "In Stock";
 };
 
 // Create initial products if none exist
@@ -109,10 +116,62 @@ initializeProducts();
 
 // Main service functions
 export const productService = {
-  getAll: async (): Promise<Product[]> => {
+  getAll: async (filters?: ProductFilters): Promise<Product[]> => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500));
-    return getStoredProducts();
+    
+    let products = getStoredProducts();
+    
+    // Apply filters if provided
+    if (filters) {
+      // Filter by search term
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        products = products.filter(p => 
+          p.name.toLowerCase().includes(searchTerm) || 
+          p.description.toLowerCase().includes(searchTerm) ||
+          p.category.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      // Filter by category
+      if (filters.category && filters.category !== "all") {
+        products = products.filter(p => p.category === filters.category);
+      }
+      
+      // Filter by status
+      if (filters.status && filters.status !== "all") {
+        products = products.filter(p => p.status === filters.status);
+      }
+      
+      // Filter by featured
+      if (filters.featured !== undefined && filters.featured !== "all") {
+        products = products.filter(p => p.featured === filters.featured);
+      }
+      
+      // Sort products
+      if (filters.sortField) {
+        const sortField = filters.sortField;
+        const sortOrder = filters.sortOrder || "asc";
+        
+        products.sort((a, b) => {
+          let valueA = a[sortField];
+          let valueB = b[sortField];
+          
+          // Handle string comparisons
+          if (typeof valueA === "string" && typeof valueB === "string") {
+            valueA = valueA.toLowerCase();
+            valueB = valueB.toLowerCase();
+          }
+          
+          if (valueA < valueB) return sortOrder === "asc" ? -1 : 1;
+          if (valueA > valueB) return sortOrder === "asc" ? 1 : -1;
+          return 0;
+        });
+      }
+    }
+    
+    return products;
   },
   
   getById: async (id: string): Promise<Product | null> => {
@@ -128,7 +187,7 @@ export const productService = {
     const newProduct: Product = {
       id: generateId(),
       ...productData,
-      status: productData.stock > 0 ? "In Stock" : "Out of Stock",
+      status: determineProductStatus(productData.stock),
       createdAt: timestamp,
       updatedAt: timestamp
     };
@@ -148,12 +207,15 @@ export const productService = {
     
     if (productIndex === -1) return null;
     
+    // Determine the new stock status if stock is being updated
+    const newStatus = productData.stock !== undefined 
+      ? determineProductStatus(productData.stock)
+      : products[productIndex].status;
+    
     const updatedProduct: Product = {
       ...products[productIndex],
       ...productData,
-      status: productData.stock !== undefined 
-        ? (productData.stock > 0 ? "In Stock" : "Out of Stock")
-        : products[productIndex].status,
+      status: newStatus,
       updatedAt: new Date().toISOString()
     };
     
@@ -161,6 +223,27 @@ export const productService = {
     saveProductsToStorage(products);
     
     return updatedProduct;
+  },
+  
+  duplicate: async (id: string): Promise<Product | null> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const products = getStoredProducts();
+    const productToDuplicate = products.find(p => p.id === id);
+    
+    if (!productToDuplicate) return null;
+    
+    const timestamp = new Date().toISOString();
+    const duplicatedProduct: Product = {
+      ...productToDuplicate,
+      id: generateId(),
+      name: `${productToDuplicate.name} (Copy)`,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    
+    saveProductsToStorage([...products, duplicatedProduct]);
+    return duplicatedProduct;
   },
   
   delete: async (id: string): Promise<boolean> => {
@@ -180,6 +263,17 @@ export const productService = {
     const products = getStoredProducts();
     const categories = [...new Set(products.map(p => p.category))];
     return categories;
+  },
+
+  updateStock: async (id: string, newStock: number): Promise<Product | null> => {
+    return productService.update(id, { stock: newStock });
+  },
+  
+  toggleFeatured: async (id: string): Promise<Product | null> => {
+    const product = await productService.getById(id);
+    if (!product) return null;
+    
+    return productService.update(id, { featured: !product.featured });
   }
 };
 
